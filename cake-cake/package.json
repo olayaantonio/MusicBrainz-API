@@ -1,0 +1,28 @@
+{
+  "name":         "cake",
+  "description":  "Coffee-Script's Make",
+  "keywords":     ["coffeescript"],
+  "author":       "Stéphane Alnet",
+  "version":      "0.1.1",
+  "license":      "MIT",
+  "engines":      {
+    "node":       ">=0.8.0"
+  },
+  "directories" : {
+    "lib" : "./lib/coffee-script"
+  },
+  "bin":          {
+    "cake":       "./bin/cake"
+  },
+  "scripts": {
+    "test": "node ./bin/cake test"
+  },
+  "bugs":         "https://github.com/shimaore/cake/issues",
+  "repository":   {
+    "type": "git",
+    "url": "git://github.com/shimaore/cake.git"
+  },
+  "dependencies": {
+    "coffee-script": "latest"
+  }
+}
