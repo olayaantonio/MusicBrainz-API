@@ -12,8 +12,8 @@ const PORT=3000;
 function handleMBID(req, res){
 	request('http://musicbrainz.org/ws/2/artist'+ req.url+'?&fmt=json&inc=url-rels+release-groups', function (error, response, body) {
 	  if (!error && response.statusCode == 200) {
-	  	handleMBIDBody(body)
-	  	handleAlbums(body)
+	  	//handleMBIDBody(body)
+	  	//handleAlbums(body)
 			handleCoverArtArchive(body)
 			albumCoverURL(urls)
 	  }else{
@@ -45,6 +45,7 @@ function wikipediaBody(artist) {
 		var pages = JSON.parse(body).query.pages
 		page_ids.forEach(function(page_id){
 			var extract = pages[page_id].extract
+			console.log(extract)
 		})
 	})
 }
@@ -53,6 +54,7 @@ function handleAlbums(body) {
 	var release_groups = JSON.parse(body)["release-groups"]
 	release_groups.forEach(function(releaseGroups){
 		var albumTitles = releaseGroups.title
+		console.log(albumTitles)
 	})
 }
 
@@ -60,6 +62,7 @@ function handleCoverArtArchive(body) {
 	var release_groups = JSON.parse(body)["release-groups"]
 	release_groups.forEach(function(releaseGroups){
 		var album_titles = [releaseGroups.title]
+		console.log(album_titles)
 		return album_titles
 	})
 }
