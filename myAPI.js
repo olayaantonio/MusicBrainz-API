@@ -3,19 +3,20 @@
 //Requires/imports the HTTP module and request function
 var http = require('http');
 var request = require('request');
+var Q = require('q')
 
 //Defines a port we want to listen to
 const PORT=3000;
 
 //Function which handles requests and send response for MBID
 
-function handleMBID(req, res){
+function requestPropagator(req, res){
 	request('http://musicbrainz.org/ws/2/artist'+ req.url+'?&fmt=json&inc=url-rels+release-groups', function (error, response, body) {
 	  if (!error && response.statusCode == 200) {
-	  	//handleMBIDBody(body)
-	  	//handleAlbums(body)
-			handleCoverArtArchive(body)
-			albumCoverURL(urls)
+	  	handleMBIDBody(body)
+			.then(handleAlbums(body))
+			.then(handleCoverArtArchive(body))
+			.then(albumCoverURL(urls))
 	  }else{
 	  	console.log('error: '+response.statusCode)
 	  }
@@ -45,7 +46,7 @@ function wikipediaBody(artist) {
 		var pages = JSON.parse(body).query.pages
 		page_ids.forEach(function(page_id){
 			var extract = pages[page_id].extract
-			console.log(extract)
+			return extract
 		})
 	})
 }
@@ -79,7 +80,7 @@ function albumCoverURL(urls) {
 }
 
 //Create a server
-var server = http.createServer(handleMBID);
+var server = http.createServer(requestPropagator);
 
 //Starts our server
 server.listen(PORT, function(){
