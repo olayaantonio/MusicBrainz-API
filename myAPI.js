@@ -5,15 +5,16 @@ var http = require('http');
 var request = require('request');
 
 //Defines a port we want to listen to
-const PORT=3000; 
+const PORT=3000;
 
-//Function which handles requests and send response for MBID 
+//Function which handles requests and send response for MBID
 
 function handleMBID(req, res){
 	request('http://musicbrainz.org/ws/2/artist'+ req.url+'?&fmt=json&inc=url-rels+release-groups', function (error, response, body) {
 	  if (!error && response.statusCode == 200) {
 	  	handleMBIDBody(body)
 	  	handleAlbums(body)
+			handleCoverArtArchive(body)
 	  }else{
 	  	console.log('error: '+response.statusCode)
 	  }
@@ -26,7 +27,7 @@ function handleMBIDBody(body) {
   		if (relation.type == "wikipedia") {
   			var url = relation.url.resource
   			var lastPathComponent = lastPathComponentFromURL(url)
-  			wikipediaBody(lastPathComponent) 
+  			wikipediaBody(lastPathComponent)
   		}
   	})
 }
@@ -43,22 +44,28 @@ function wikipediaBody(artist) {
 		var pages = JSON.parse(body).query.pages
 		page_ids.forEach(function(page_id){
 			var extract = pages[page_id].extract
-			if(extract.length > 0){
-				//console.log(extract)
-			}
 		})
-	})
-}	
-
-function handleAlbums(body) {
-	var release_groups = JSON.parse(body)["release-groups"]	
-	release_groups.forEach(function(releaseGroups){
-		var albumTitles = releaseGroups.title;
-		console.log(albumTitles) 
 	})
 }
 
+function handleAlbums(body) {
+	var release_groups = JSON.parse(body)["release-groups"]
+	release_groups.forEach(function(releaseGroups){
+		var albumTitles = releaseGroups.title
+	})
+}
 
+function handleCoverArtArchive(body) {
+	var release_groups = JSON.parse(body)["release-groups"]
+	release_groups.forEach(function(releaseGroups){
+		var album_titles = [releaseGroups.title]
+		console.log(album_titles)
+		// var url = 'http://coverartarchive.org/release-group/' + album_titles
+		// request(url, function (error, response, body){
+		// 	var album_image_url = JSON.parse(body).images.image
+		// 	console.log(album_image_url);
+	})
+}
 
 //Create a server
 var server = http.createServer(handleMBID);
