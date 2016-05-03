@@ -15,6 +15,7 @@ function handleMBID(req, res){
 	  	handleMBIDBody(body)
 	  	handleAlbums(body)
 			handleCoverArtArchive(body)
+			albumCoverURL(urls)
 	  }else{
 	  	console.log('error: '+response.statusCode)
 	  }
@@ -59,11 +60,18 @@ function handleCoverArtArchive(body) {
 	var release_groups = JSON.parse(body)["release-groups"]
 	release_groups.forEach(function(releaseGroups){
 		var album_titles = [releaseGroups.title]
-		console.log(album_titles)
-		// var url = 'http://coverartarchive.org/release-group/' + album_titles
-		// request(url, function (error, response, body){
-		// 	var album_image_url = JSON.parse(body).images.image
-		// 	console.log(album_image_url);
+		return album_titles
+	})
+}
+
+function albumCoverURL(urls) {
+	var album_titles_array = handleCoverArtArchive(body)
+	album_titles_array.forEach(function(album_title){
+		var url = 'http://coverartarchive.org/release-group/' + album_title
+		request(url, function (error, response, body){
+			var album_image_url = JSON.parse(body).images.image
+			console.log(album_image_url);
+		})
 	})
 }
 
