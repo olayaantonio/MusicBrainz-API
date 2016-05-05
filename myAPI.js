@@ -13,12 +13,13 @@ const PORT=3000;
 function requestPropagator(req, res){
 	request('http://musicbrainz.org/ws/2/artist'+ req.url+'?&fmt=json&inc=url-rels+release-groups', function (error, response, body) {
 	  if (!error && response.statusCode == 200) {
-	  	handleMBIDBody(body)
+			handleMBIDBody(body)
 			.then(handleAlbums(body))
 			.then(handleCoverArtArchive(body))
 			.then(albumCoverURL(urls))
-	  }else{
-	  	console.log('error: '+response.statusCode)
+			.catch(function(error){
+				console.log('error: '+response.statusCode)
+			})
 	  }
 	})
 }
@@ -40,44 +41,72 @@ function lastPathComponentFromURL(url) {
 }
 
 function wikipediaBody(artist) {
-	var url = 'https://en.wikipedia.org/w/api.php?format=json&indexpageids&action=query&prop=extracts&exintro=&explaintext=&titles=' + artist
-	request(url,function (error,response, body){
-		var page_ids = JSON.parse(body).query.pageids
-		var pages = JSON.parse(body).query.pages
-		page_ids.forEach(function(page_id){
-			var extract = pages[page_id].extract
-			return extract
+	var deferrer = Q.defer()
+	asynchronousFunction(function(response_1){
+		var url = 'https://en.wikipedia.org/w/api.php?format=json&indexpageids&action=query&prop=extracts&exintro=&explaintext=&titles=' + artist
+		request(url,function (error,response, body){
+			var page_ids = JSON.parse(body).query.pageids
+			var pages = JSON.parse(body).query.pages
+			page_ids.forEach(function(page_id){
+				var extract = pages[page_id].extract
+				return extract
+			})
 		})
+		deferrer.resolve(response_1)
 	})
+	return deferrer.promise()
+	console.log(extract);
 }
+
+var response_1 = wikipediaBody
 
 function handleAlbums(body) {
-	var release_groups = JSON.parse(body)["release-groups"]
-	release_groups.forEach(function(releaseGroups){
-		var albumTitles = releaseGroups.title
-		console.log(albumTitles)
+	var deferrer = Q.defer()
+	asynchronousFunction(function(response_2){
+		var release_groups = JSON.parse(body)["release-groups"]
+		release_groups.forEach(function(releaseGroups){
+			var albumTitles = releaseGroups.title
+			console.log(albumTitles)
+		})
+		deferrer.resolve(response_2)
 	})
+	return deferrer.promise()
 }
+
+var response_2 = handleAlbums()
 
 function handleCoverArtArchive(body) {
-	var release_groups = JSON.parse(body)["release-groups"]
-	release_groups.forEach(function(releaseGroups){
-		var album_titles = [releaseGroups.title]
-		console.log(album_titles)
-		return album_titles
+	var deferrer = Q.defer()
+	asynchronousFunction(function(response_3){
+		var release_groups = JSON.parse(body)["release-groups"]
+		release_groups.forEach(function(releaseGroups){
+			var album_titles = [releaseGroups.title]
+			return album_titles
+		})
+		deferrer.resolve(response_3)
 	})
+	return deferrer.promise()
 }
 
+var response_3 = handleCoverArtArchive()
+
 function albumCoverURL(urls) {
-	var album_titles_array = handleCoverArtArchive(body)
-	album_titles_array.forEach(function(album_title){
-		var url = 'http://coverartarchive.org/release-group/' + album_title
-		request(url, function (error, response, body){
-			var album_image_url = JSON.parse(body).images.image
-			console.log(album_image_url);
+	var deferrer = Q.defer()
+	asynchronousFunction(function(response_3){
+		var album_titles_array = handleCoverArtArchive(urls)
+		album_titles_array.forEach(function(album_title){
+			var url = 'http://coverartarchive.org/release-group/' + album_title
+			request(url, function (error, response, body){
+				var album_image_url = JSON.parse(body).images.image
+				console.log(album_image_url);
+			})
 		})
+		deferrer.resolve(response_4)
 	})
+	return deferrer.promise()
 }
+
+var response_4 = albumCoverURL()
 
 //Create a server
 var server = http.createServer(requestPropagator);
